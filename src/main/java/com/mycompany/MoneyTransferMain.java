@@ -32,7 +32,7 @@ public class MoneyTransferMain {
                 System.exit(-1);
             }
         }
-        logger.info("Server started. Starting the client");
+        logger.info("Server started. Starting the client and running the demo");
         MoneyTransferClient client = new MoneyTransferClient();
         client.run();
         // money transfers done. stopping

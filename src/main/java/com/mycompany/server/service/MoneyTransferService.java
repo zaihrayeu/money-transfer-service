@@ -33,8 +33,8 @@ public class MoneyTransferService {
         if (clientByID != null) {
             return Response.status(Response.Status.OK).entity(clientByID.getBalance()).build();
         } else {
-            return Response.status(Response.Status.NOT_FOUND).
-                    entity("client with ID " + clientId + " not found").build();
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("client with ID " + clientId + " not found").build();
         }
     }
 
@@ -48,8 +48,8 @@ public class MoneyTransferService {
         if (clientByID != null) {
             return Response.status(Response.Status.OK).entity(clientByID.getName()).build();
         } else {
-            return Response.status(Response.Status.NOT_FOUND).
-                    entity("client with ID " + clientId + " not found").build();
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("client with ID " + clientId + " not found").build();
         }
     }
 
@@ -68,19 +68,17 @@ public class MoneyTransferService {
         Client fromClient = ClientRepository.getClientByID(fromClientId);
         Client toClient = ClientRepository.getClientByID(toClientId);
         if (fromClient == null || toClient == null) {
-            return Response.status(Response.Status.NOT_FOUND).
-                    entity("Sending or receiving client not found").build();
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("Sending or receiving client not found").build();
         }
-        Long requestId;
         try {
-            requestId = MoneyTransferManager.requestMoneyTransfer(fromClient, toClient, amount);
+            Long requestId = MoneyTransferManager.requestMoneyTransfer(fromClient, toClient, amount);
+            return Response.status(Response.Status.OK).entity(requestId).build();
         } catch (WrongAmountException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity("Wrong money transfer amount requested").build();
         } catch (NotEnoughFundException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity("Not enough funds to make a money transfer").build();
         }
-
-        return Response.status(Response.Status.OK).entity(requestId).build();
     }
 
     /**
@@ -96,7 +94,8 @@ public class MoneyTransferService {
         if (status != null) {
             return Response.status(Response.Status.OK).entity(status.name()).build();
         } else {
-            return Response.status(Response.Status.NOT_FOUND).build();
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("Money transfer request not found").build();
         }
     }
 }

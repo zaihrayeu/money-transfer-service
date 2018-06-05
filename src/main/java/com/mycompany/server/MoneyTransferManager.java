@@ -10,10 +10,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * class that manages money transfer requests. it has a FIFO queue to keep pending requests. it also has a continuously
- * running money transfer request processor that checks for new requests in the queue and process them one by one of
+ * class that manages money transfer requests. It has a FIFO queue to keep pending requests. it also has a continuously
+ * running money transfer request processor that checks for new requests in the queue and process them one by one if
  * the queue is not empty.
  */
 public class MoneyTransferManager extends Thread {
@@ -23,15 +24,15 @@ public class MoneyTransferManager extends Thread {
      */
     private boolean isRunning = true;
     /**
-     * the ID of the next money transfer request (incremented on each new request)
+     * the ID of the next money transfer request (incremented on each new request). we use AtomicLong to keep it thread safe
      */
-    private static long transferRequestId = 0;
+    private static AtomicLong transferRequestId = new AtomicLong(0);
     /**
      * a synchronized FIFO queue to keep pending money transaction requests
      */
     private static Queue<MoneyTransferRequest> requestQueue = new ConcurrentLinkedQueue<>();
     /**
-     * map from money transfer request IDs to requests. the map keeps all requests (pending, completed, etc)
+     * a map from money transfer request IDs to requests. The map keeps all requests (pending, completed, etc)
      */
     private static Map<Long, MoneyTransferRequest> idToMoneyTransferRequest = new HashMap<>();
 
@@ -45,7 +46,7 @@ public class MoneyTransferManager extends Thread {
      * @throws WrongAmountException   thrown in case if the requested amount is wrong
      * @throws NotEnoughFundException thrown in case if the sending client does not have enough funds
      */
-    public static synchronized Long requestMoneyTransfer(Client fromClient, Client toClient, long amount)
+    public static Long requestMoneyTransfer(Client fromClient, Client toClient, long amount)
             throws WrongAmountException, NotEnoughFundException {
         if (amount <= 0) {
             throw new WrongAmountException();
@@ -57,19 +58,19 @@ public class MoneyTransferManager extends Thread {
             }
             fromClient.setBalance(fromClient.getBalance() - amount);
         }
-        transferRequestId++;
-        MoneyTransferRequest request = new MoneyTransferRequest(transferRequestId, fromClient, toClient, amount);
+        long nextRequestId = transferRequestId.incrementAndGet();
+        MoneyTransferRequest request = new MoneyTransferRequest(nextRequestId, fromClient, toClient, amount);
         requestQueue.add(request);
-        idToMoneyTransferRequest.put(transferRequestId, request);
+        idToMoneyTransferRequest.put(nextRequestId, request);
 
-        return transferRequestId;
+        return nextRequestId;
     }
 
     /**
      * returns money transfer request status given a request ID or null if there is no request with such ID
      *
      * @param moneyTransferRequestId money transfer request ID
-     * @return money transfer request status
+     * @return money transfer request status, if it is found and null otherwise
      */
     public static MoneyTransferRequestStatus getMoneyTransferRequestStatus(long moneyTransferRequestId) {
         MoneyTransferRequest request = idToMoneyTransferRequest.get(moneyTransferRequestId);
@@ -78,10 +79,6 @@ public class MoneyTransferManager extends Thread {
         } else {
             return null;
         }
-    }
-
-    public boolean isRunning() {
-        return isRunning;
     }
 
     public void setRunning(boolean running) {

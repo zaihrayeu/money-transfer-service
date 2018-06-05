@@ -62,14 +62,14 @@ public class MoneyTransferClient {
             logger.info("---------------------------");
             Thread.sleep(1000);
 
-            // transfer money from client 2 to client 3 (inactive)
+            // transfer money from client 2 to client 3 (inactive) - money returned
             logger.info("Transferring 30 from client " + client2Name + " to client " + client3Name);
             try {
                 requestMoneyTransferSync(2, 3, 30);
             } catch (MoneyTransferException e) {
                 logger.error("MoneyTransferException: " + e.getMessage());
             }
-            // transfer money from client 3 to a non existing client
+            // transfer money from client 3 to a non existing client - 404 error
             logger.info("Transferring 40 from client " + client3Name + " to a non existent client");
             try {
                 requestMoneyTransferSync(3, 5, 40);

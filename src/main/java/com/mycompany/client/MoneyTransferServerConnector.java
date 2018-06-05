@@ -90,12 +90,13 @@ public class MoneyTransferServerConnector {
         MoneyTransferRequestStatus moneyTransferStatus = MoneyTransferServerConnector.getMoneyTransferStatus(moneyTransferRequestId);
         do {
             logger.info("Status: " + moneyTransferStatus);
-            Thread.sleep(100);
+            Thread.sleep(200);
             moneyTransferStatus = MoneyTransferServerConnector.getMoneyTransferStatus(moneyTransferRequestId);
         } while (moneyTransferStatus.equals(MoneyTransferRequestStatus.PENDING));
         logger.info("Exit Status: " + moneyTransferStatus);
         logger.info("Current balance of the sender client: " + MoneyTransferServerConnector.getClientBalance(fromClientId));
         logger.info("Current balance of the receiver client: " + MoneyTransferServerConnector.getClientBalance(toClientId));
+
         return moneyTransferStatus;
     }
 
@@ -106,8 +107,7 @@ public class MoneyTransferServerConnector {
      * @param url URL for the GET request
      * @return string returned from the endpoint
      */
-    private static String
-    makeGetRequest(String url) throws IOException, MoneyTransferException {
+    private static String makeGetRequest(String url) throws IOException, MoneyTransferException {
         // prepare http client
         HttpClient client = new HttpClient();
         // prepare get method

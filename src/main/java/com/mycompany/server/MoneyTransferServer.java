@@ -17,15 +17,14 @@ public class MoneyTransferServer extends Thread {
 
     @Override
     public void run() {
-        // jetty server with APIs
+        // jetty server with MoneyTransferService APIs
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");
         server.setHandler(context);
-        ServletHolder jerseyServlet = context.addServlet(
-                org.glassfish.jersey.servlet.ServletContainer.class, "/*");
+        ServletHolder jerseyServlet = context
+                .addServlet(org.glassfish.jersey.servlet.ServletContainer.class, "/*");
         jerseyServlet.setInitOrder(0);
-        jerseyServlet.setInitParameter(
-                "jersey.config.server.provider.classnames",
+        jerseyServlet.setInitParameter("jersey.config.server.provider.classnames",
                 MoneyTransferService.class.getCanonicalName());
         try {
             server.start();
